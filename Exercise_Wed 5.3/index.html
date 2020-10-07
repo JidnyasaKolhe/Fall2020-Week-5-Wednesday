@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>d3 Area Generator</title>
+    <script src="../libs/d3/d3.min.js"></script>
+</head>
+<body>
+
+<div width="100%">
+    <svg id="main" width="100%" height="100%" viewBox="0 0 1000 800">
+    </svg>
+</div>
+<script>
+    let margins = 50;
+    let width = 500 - 2 * margins;
+    let height = 300 - 2 * margins;
+    let svg = d3.selectAll('svg')
+   
+   stackcolors = ["#0C0350", "#0728C3", "#2B80CA", "#75BCF9"]
+
+
+   keys = ['EstimatedCost', 'RawMaterial', 'Workmanship','YearlyStorage'];
+   var xFormat = "%b-%Y";;
+   var parseTime = d3.timeParse("%Y-%m");
+   
+   
+   
+   d3.csv("data_sample.csv", d3.autoType).then(
+       function (data){
+        console.log(data)
+        let stack = d3.stack().keys(keys);
+        let stackedSeries = stack(data);
+        
+        var yAxis = d3.scaleLinear()
+            .range([height, margins])
+            .domain([0, d3.max(stackedSeries, d => d3.max(d, d => d[1]))]);
+            
+    
+        var xAxis = d3.scaleTime()
+            .domain(d3.extent(data, function(d) { return (d.date)}))
+            .range([margins, width]);
+            console.log(d3.extent(data, function(d) { return (d.date)}))
+
+            
+
+        let area = d3.area()
+        .x(function(d) {
+            console.log(xAxis(d.data.date))
+            return xAxis(d.data.date);
+        })
+        .y0(function(d) {
+            return yAxis(d[0]);
+        })
+        .y1(function(d) {
+            return yAxis(d[1]);
+        });
+
+        svg.selectAll('path')
+        .data(stackedSeries)
+        .enter()
+        .append('path')
+        .style('fill', function(d, i) {
+            return stackcolors[i];
+        })
+        .attr('d', area)
+
+        svg.append("g")
+            .attr("transform", "translate("+ '0' + "," + height + ")")
+            .call(d3.axisBottom(xAxis))
+
+
+        svg.append("g")
+                .attr("transform", "translate("+margins+",0)")
+               .call(d3.axisLeft(yAxis))
+
+            }
+
+        
+   
+   );
+  
+</script>
+
+</body>
+</html>

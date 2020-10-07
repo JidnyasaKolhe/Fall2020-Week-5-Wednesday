@@ -87,6 +87,8 @@
         .attr('height', 20);
 
 
+   
+
    svg.append("g")
             .attr("transform", "translate("+ margins + "," + '8' + ")")
             .call(d3.axisLeft(yAxis).ticks(12).tickFormat(d3.timeFormat(xFormat)));
